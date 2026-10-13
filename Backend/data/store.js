@@ -1,44 +1,160 @@
-const bcrypt = require('bcryptjs');
-let nextUserId = 3;
-let nextEventId = 4;
+const db = require('../Database');
 
-const users = [
-  { user_id: 1, full_name: 'Bart Meulenbeld', email: 'admin@dgsa.test',
-    password_hash: bcrypt.hashSync('admin1234', 10), role: 'admin', tier: 'DGSA' },
-  { user_id: 2, full_name: 'Josephine Meulenbeld', email: 'player@dgsa.test',
-    password_hash: bcrypt.hashSync('player1234', 10), role: 'player', tier: 'DGSA' },
-];
-
-const events = [
-  { event_id: 1, name: '1st African Disc Golf Championship', location: 'Inanda Country Base, Kyalami',
-    description: 'The inaugural PDGA African Disc Golf Championship.', pdga_tier: 'C-Tier',
-    start_datetime: '2026-11-06T07:00:00', end_datetime: '2026-11-08T17:00:00',
-    fee_non_member: 450, fee_member: 375, poster_path: null },
-  { event_id: 2, name: 'Ladies and Mens Doubles', location: 'Inanda Disc Golf Course, Kyalami',
-    description: 'Doubles event.', pdga_tier: 'C-Tier',
-    start_datetime: '2026-12-13T07:00:00', end_datetime: '2026-12-14T17:00:00',
-    fee_non_member: 300, fee_member: 250, poster_path: null },
-  { event_id: 3, name: 'Gauteng Winter League', location: 'Inanda Disc Golf Course, Kyalami',
-    description: 'League round.', pdga_tier: 'C-Tier',
-    start_datetime: '2027-01-28T10:00:00', end_datetime: null,
-    fee_non_member: 200, fee_member: 150, poster_path: null },
-];
+const fmtMobile = (m) => m || '';
 
 module.exports = {
-  findUserByEmail: async (email) => users.find((u) => u.email === email),
-  createUser: async ({ full_name, email, password_hash }) => {
-    const user = { user_id: nextUserId++, full_name, email, password_hash, role: 'player', tier: 'Free' };
-    users.push(user);
-    return user;
+  findUserByEmail: async (email) => {
+    const [rows] = await db.execute(
+      `SELECT u.user_id, u.full_name, u.email, u.password_hash, u.role, u.mobile,
+              u.status, u.membership_status, t.name AS tier
+       FROM users u JOIN tiers t ON t.tier_id = u.tier_id
+       WHERE u.email = ?`, [email]);
+    return rows[0];
   },
-  getUpcomingEvents: async () =>
-    events.filter((e) => new Date(e.start_datetime) > new Date())
-          .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime)),
-  createEvent: async (data) => {
-    const event = { event_id: nextEventId++, ...data };
-    events.push(event);
-    return event;
+
+  findUserById: async (id) => {
+    const [rows] = await db.execute(
+      `SELECT u.user_id, u.full_name, u.email, u.password_hash, u.role, u.mobile,
+              u.status, u.membership_status, t.name AS tier
+       FROM users u JOIN tiers t ON t.tier_id = u.tier_id
+       WHERE u.user_id = ?`, [id]);
+    return rows[0];
+  },
+
+  createUser: async ({ full_name, email, password_hash }) => {
+    const [r] = await db.execute(
+      `INSERT INTO users (full_name, email, password_hash, tier_id)
+       VALUES (?, ?, ?, (SELECT tier_id FROM tiers WHERE name = 'Free'))`,
+      [full_name, email, password_hash]);
+    return { user_id: r.insertId, full_name, email, role: 'player', tier: 'Free' };
+  },
+
+  getUpcomingEvents: async () => {
+    const [rows] = await db.execute(
+      `SELECT e.event_id, e.name, e.location, e.description, e.bank_details,
+              e.poster_path, p.name AS pdga_tier, e.start_datetime, e.end_datetime,
+              e.fee_non_member, e.fee_member
+       FROM events e JOIN pdga_tiers p ON p.pdga_tier_id = e.pdga_tier_id
+       WHERE e.start_datetime > NOW()
+       ORDER BY e.start_datetime`);
+    return rows;
+  },
+
+  createEvent: async (d) => {
+    const [r] = await db.execute(
+      `INSERT INTO events (name, location, description, bank_details, poster_path,
+                           pdga_tier_id, start_datetime, end_datetime, fee_non_member, fee_member)
+       VALUES (?, ?, ?, ?, ?, (SELECT pdga_tier_id FROM pdga_tiers WHERE name = ?), ?, ?, ?, ?)`,
+      [d.name, d.location, d.description, d.bank_details || '', d.poster_path,
+       d.pdga_tier, d.start_datetime.replace('T', ' '),
+       d.end_datetime ? d.end_datetime.replace('T', ' ') : null,
+       d.fee_non_member, d.fee_member]);
+    return { event_id: r.insertId, ...d };
+  },
+
+  deleteEvent: async (id) => {
+    const [r] = await db.execute('DELETE FROM events WHERE event_id = ?', [id]);
+    return r.affectedRows > 0;
+  },
+
+  applyForMembership: async (id, p, proofPath) => {
+    const conn = await db.getConnection();
+    try {
+      await conn.beginTransaction();
+      await conn.execute(
+        `INSERT INTO member_profiles
+           (user_id, gender, date_of_birth, sa_id, passport_no, usual_division_id,
+            address, country, province, city, suburb, zip)
+         VALUES (?, ?, ?, ?, ?, (SELECT division_id FROM divisions WHERE name = ?), ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+           gender = VALUES(gender), date_of_birth = VALUES(date_of_birth),
+           sa_id = VALUES(sa_id), passport_no = VALUES(passport_no),
+           usual_division_id = VALUES(usual_division_id), address = VALUES(address),
+           country = VALUES(country), province = VALUES(province), city = VALUES(city),
+           suburb = VALUES(suburb), zip = VALUES(zip)`,
+        [id, p.gender, p.date_of_birth, p.sa_id || null, p.passport_no || null, p.usual_division,
+         p.address, p.country, p.province, p.city, p.suburb, p.zip]);
+      await conn.execute(
+        "UPDATE users SET mobile = ?, membership_status = 'pending' WHERE user_id = ?",
+        [p.mobile, id]);
+      await conn.execute(
+        `INSERT INTO payments (user_id, type, amount, proof_path, status)
+         VALUES (?, 'membership', 375, ?, 'pending')`,
+        [id, proofPath]);
+      await conn.commit();
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
+    return { membership_status: 'pending' };
+  },
+
+  getPayments: async () => {
+    const [rows] = await db.execute(
+      `SELECT p.payment_id, p.user_id, p.type, p.event_id, p.amount, p.proof_path, p.status,
+              u.full_name AS name, e.name AS event_name
+       FROM payments p
+       JOIN users u ON u.user_id = p.user_id
+       LEFT JOIN events e ON e.event_id = p.event_id
+       ORDER BY p.payment_id DESC`);
+    return rows;
+  },
+
+  setPaymentStatus: async (id, status) => {
+    const conn = await db.getConnection();
+    try {
+      await conn.beginTransaction();
+      const [found] = await conn.execute(
+        'SELECT user_id, type FROM payments WHERE payment_id = ?', [id]);
+      if (!found.length) { await conn.rollback(); return null; }
+      await conn.execute('UPDATE payments SET status = ? WHERE payment_id = ?', [status, id]);
+
+      if (found[0].type === 'membership') {
+        if (status === 'on_time') {
+          await conn.execute(
+            `UPDATE users SET membership_status = 'active',
+               tier_id = (SELECT tier_id FROM tiers WHERE name = 'DGSA') WHERE user_id = ?`,
+            [found[0].user_id]);
+        } else {
+          await conn.execute(
+            `UPDATE users SET membership_status = ?,
+               tier_id = (SELECT tier_id FROM tiers WHERE name = 'Free') WHERE user_id = ?`,
+            [status, found[0].user_id]);
+        }
+      }
+      await conn.commit();
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
+    const [rows] = await db.execute(
+      `SELECT p.payment_id, p.status, u.full_name AS name
+       FROM payments p JOIN users u ON u.user_id = p.user_id WHERE p.payment_id = ?`, [id]);
+    return rows[0];
+  },
+
+  getMembers: async () => {
+    const [rows] = await db.execute(
+      `SELECT u.user_id, u.full_name AS name, t.name AS tier, u.mobile, u.email, u.status
+       FROM users u JOIN tiers t ON t.tier_id = u.tier_id
+       WHERE u.role = 'player' ORDER BY u.full_name`);
+    return rows.map((m) => ({
+      user_id: m.user_id, name: m.name, tier: m.tier,
+      contact: fmtMobile(m.mobile) || m.email, status: m.status,
+    }));
+  },
+
+  setMemberStatus: async (id, status) => {
+    const [r] = await db.execute('UPDATE users SET status = ? WHERE user_id = ?', [status, id]);
+    return r.affectedRows ? { user_id: id, status } : null;
+  },
+
+  getRegistrations: async () => {
+    const [rows] = await db.query('SELECT * FROM v_tournament_registrations ORDER BY reg_id DESC');
+    return rows;
   },
 };
-
-//Juust for now while i wait for a responce

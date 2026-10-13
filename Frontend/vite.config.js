@@ -3,6 +3,6 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  server: { proxy: { '/api': 'http://localhost:5000', '/uploads': 'http://localhost:5000' } },
+server: { proxy: { '/api': 'http://localhost:5000', '/uploads': 'http://localhost:5000' } },
   plugins: [react()],
 })

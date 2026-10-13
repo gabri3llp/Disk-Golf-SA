@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
-import ImagePlaceholder from '../../components/ImagePlaceholder';
-import EventsCarousel from '../../components/EventsCarousel';
-import Faq from '../../components/Faq';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import ImagePlaceholder from '../components/ImagePlaceholder';
+import EventsCarousel from '../components/EventsCarousel';
+import Faq from '../components/Faq';
 
 export default function Home() {
   const [events, setEvents] = useState([]);

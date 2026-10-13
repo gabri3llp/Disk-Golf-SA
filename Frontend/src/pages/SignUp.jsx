@@ -17,7 +17,7 @@ export default function SignUp() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('role', data.role);
       localStorage.setItem('name', data.name);
-      navigate('/dashboard');
+      navigate('/member-tier');
     } catch (err) {
       const first = err.response?.data?.errors?.[0];
       setError(err.response?.data?.error || (first && `${first.path}: ${first.msg}`) || 'Something went wrong');

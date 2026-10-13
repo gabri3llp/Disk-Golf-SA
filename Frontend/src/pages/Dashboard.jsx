@@ -1,9 +1,12 @@
 import { useNavigate } from 'react-router-dom';
+import AdminDashboard from './AdminDashboard';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const name = localStorage.getItem('name');
   const role = localStorage.getItem('role');
+
+  if (role === 'admin') return <AdminDashboard />;
 
   const logout = () => {
     localStorage.clear();
