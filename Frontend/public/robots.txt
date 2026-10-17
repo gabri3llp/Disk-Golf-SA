@@ -5,4 +5,4 @@ Disallow: /events/
 Disallow: /become-member
 Disallow: /member-tier
 
-Sitemap: https://YOUR-SITE.azurestaticapps.net/sitemap.xml
+Sitemap: https://victorious-desert-0caf98b00.4.azurestaticapps.net/sitemap.xml
