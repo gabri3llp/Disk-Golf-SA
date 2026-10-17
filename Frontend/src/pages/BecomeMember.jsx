@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import FileUpload from '../components/FileUpload';
-import ImagePlaceholder from '../components/ImagePlaceholder';
-import { BANK, MEMBERSHIP_FEE, DIVISIONS } from '../constants';
+import AuthPhoto from '../components/AuthPhoto';
 import SuccessModal from '../components/SuccessModal';
+import { BANK, MEMBERSHIP_FEE, DIVISIONS } from '../constants';
+import Seo from '../components/Seo';
 
 const PROVINCES = ['Eastern Cape', 'Free State', 'Gauteng', 'KwaZulu-Natal', 'Limpopo',
   'Mpumalanga', 'Northern Cape', 'North West', 'Western Cape'];
@@ -65,10 +66,12 @@ export default function BecomeMember() {
 
   return (
     <main className="auth-page">
+      <Seo title="Become a Member" description="Apply for DGSA membership." noindex />
       <div className="glass auth-card">
-        <ImagePlaceholder label="Player photo" className="auth-image" ratio="3 / 4" />
+        <AuthPhoto src="/Imgs/become-a-member.webp" alt="Player mid-throw in a South Africa shirt" />
+
         <div className="auth-form">
-          <h1 className="accent">Become a Member</h1>
+          <h1 className={step < 3 ? 'accent' : ''}>Become a Member</h1>
           <p className="step-indicator">Step {step} of 3</p>
 
           {step === 1 && (
@@ -132,8 +135,8 @@ export default function BecomeMember() {
 
           <div className="step-nav">
             {step > 1
-              ? <button type="button" className="link-btn" onClick={() => { setError(''); setStep(step - 1); }}>← Previous</button>
-              : <button type="button" className="link-btn" onClick={() => navigate('/member-tier')}>← Back</button>}
+              ? <button type="button" className="link-btn" onClick={() => { setError(''); setStep(step - 1); }}>← Previous Page</button>
+              : <button type="button" className="link-btn" onClick={() => navigate('/member-tier')}>← Back to Sign Up</button>}
             {step < 3
               ? <button type="button" className="link-btn" onClick={next}>Next Page →</button>
               : <button type="button" className="btn" style={{ width: 'auto' }} disabled={busy} onClick={submit}>
@@ -144,13 +147,13 @@ export default function BecomeMember() {
       </div>
 
       {done && (
-  <SuccessModal
-    title="Application sent"
-    message="Thanks! Your proof of payment has been submitted and your membership will be confirmed once it's approved."
-    buttonText="Go to dashboard"
-    onClose={() => navigate('/dashboard')}
-  />
-)}
+        <SuccessModal
+          title="Registration successful"
+          message="Your proof of payment has been submitted. Your membership will be confirmed once it's approved."
+          buttonText="Go to Dashboard"
+          onClose={() => navigate('/dashboard')}
+        />
+      )}
     </main>
   );
 }

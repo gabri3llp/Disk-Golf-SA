@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const store = require('../data/store');
 const upload = require('../middleware/upload');
+const storage = require('../storage');
 const { requireAuth } = require('../middleware/auth');
 
 router.get('/me', requireAuth, async (req, res) => {
@@ -20,7 +21,7 @@ router.post('/apply', requireAuth, upload.single('proof'), async (req, res) => {
   if (!req.body.sa_id && !req.body.passport_no) missing.push('sa_id or passport_no');
   if (missing.length) return res.status(400).json({ error: `Missing: ${missing.join(', ')}` });
 
-  const proofPath = req.file.path.replace(/\\/g, '/');
+  const proofPath = await storage.save(req.file, 'proofs');
   await store.applyForMembership(req.user.id, req.body, proofPath);
   res.status(201).json({ ok: true, membership_status: 'pending' });
 });

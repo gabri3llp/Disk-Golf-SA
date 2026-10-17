@@ -1,28 +1,37 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
+import { eventImage } from '../eventImage';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ImagePlaceholder from '../components/ImagePlaceholder';
 import EventsCarousel from '../components/EventsCarousel';
 import Faq from '../components/Faq';
+import Seo from '../components/Seo';
 
 export default function Home() {
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    document.title = 'Disc Golf South Africa | Events & Membership';
     api.get('/events').then(({ data }) => setEvents(data)).catch(() => setEvents([]));
   }, []);
 
-  const featured = events[0];
+  const featured = events.find((e) => e.featured) || events[0];
+  const others = events.filter((e) => e !== featured);
 
   return (
     <>
       <Navbar />
       <main>
+        <Seo title="Events, Tournaments & Membership" description="Discover disc golf in South Africa. Find upcoming tournaments, join DGSA and register for events." />
         <section className="hero" aria-label="Welcome">
-          <ImagePlaceholder label="Hero photo" ratio="16 / 6" />
+          <ImagePlaceholder
+            label="Hero photo"
+            ratio="16 / 6"
+            src="/Imgs/hero.webp"
+            alt="Player throwing a disc at a disc golf basket"
+            priority
+          />
           <div className="hero-content">
             <div>
               <span className="eyebrow">Welcome to</span>
@@ -36,7 +45,7 @@ export default function Home() {
           <section className="section" id="tournament">
             <h2>Tournament</h2>
             <article className="tournament-card">
-              <ImagePlaceholder label="Tournament poster" ratio="3 / 4" src={featured.poster_path ? `/${featured.poster_path}` : undefined} alt={featured.name} />
+              <ImagePlaceholder label="Tournament poster" ratio="3 / 4" src={eventImage(featured)} alt={featured.name} />
               <div className="tournament-info">
                 <h3>{featured.name}</h3>
                 <p>{featured.description}</p>
@@ -45,7 +54,7 @@ export default function Home() {
                   <li>{featured.location}</li>
                   <li>PDGA {featured.pdga_tier}</li>
                 </ul>
-                <Link to="/login" className="btn" style={{ textAlign: 'center', color: 'var(--navy-800)', marginTop: 'auto' }}>
+                <Link to={`/events/${featured.event_id}/register`} className="btn" style={{ textAlign: 'center', color: 'var(--navy-800)', marginTop: 'auto' }}>
                   Join the tournament
                 </Link>
               </div>
@@ -55,7 +64,9 @@ export default function Home() {
 
         <section className="section" aria-labelledby="events-h">
           <h2 id="events-h">Upcoming Events</h2>
-          {events.length ? <EventsCarousel events={events} /> : <p style={{ textAlign: 'center' }}>No upcoming events yet.</p>}
+          {others.length
+            ? <EventsCarousel events={others} />
+            : <p style={{ textAlign: 'center' }}>No upcoming events yet.</p>}
         </section>
 
         <section className="section" id="faq">

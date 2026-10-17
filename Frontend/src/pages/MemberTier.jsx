@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { MEMBERSHIP_FEE } from '../constants';
+import Seo from '../components/Seo';
 
 const BLURB = 'Support the growth of disc golf in South Africa while gaining access to member benefits, events, competitions, discounts, and a growing community.';
 
@@ -8,6 +9,7 @@ export default function MemberTier() {
 
   return (
     <main className="auth-page">
+      <Seo title="Membership" description="Compare the Free and DGSA Member tiers and join for R375 a year." />
       <div className="glass tier-wrap">
         <h1>Member Tier</h1>
         <div className="tier-grid">

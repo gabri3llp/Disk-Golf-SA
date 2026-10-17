@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const store = require('../data/store');
+const storage = require('../storage');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 
 router.use(requireAuth, requireAdmin);
@@ -27,5 +28,12 @@ router.patch('/members/:id', async (req, res) => {
 });
 
 router.get('/registrations', async (req, res) => res.json(await store.getRegistrations()));
+
+router.get('/file', async (req, res) => {
+  const p = String(req.query.path || '');
+  if (!storage.useS3 || !/^files\/proofs\/[\w.-]+$/.test(p))
+    return res.status(400).json({ error: 'Invalid file path' });
+  res.json({ url: await storage.signedUrl(p) });
+});
 
 module.exports = router;

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api';
+import api, { fileUrl } from '../api';
 import DashboardShell from '../components/DashboardShell';
+import Seo from '../components/Seo';
 
 const LABEL = { pending: 'Pending', on_time: 'On time', overdue: 'Overdue' };
 const ACTIONS = [
@@ -10,29 +11,49 @@ const ACTIONS = [
   { value: 'pending', text: 'Set to pending' },
 ];
 
-const ProofLink = ({ path }) =>
-  path
-    ? <a href={`/${path}`} target="_blank" rel="noreferrer">Proof of Payment</a>
-    : <span className="muted">No file</span>;
+const ProofLink = ({ path }) => {
+  if (!path) return <span className="muted">No file</span>;
+
+  const open = async (e) => {
+    e.preventDefault();
+    if (!path.startsWith('files/')) {
+      window.open(fileUrl(path), '_blank');
+      return;
+    }
+    const win = window.open('', '_blank');
+    try {
+      const { data } = await api.get('/admin/file', { params: { path } });
+      win.location = data.url;
+    } catch {
+      win.close();
+      alert('Could not open this file.');
+    }
+  };
+
+  return <a href={fileUrl(path)} onClick={open}>Proof of Payment</a>;
+};
 
 export default function AdminDashboard() {
   const [payments, setPayments] = useState([]);
   const [members, setMembers] = useState([]);
   const [regs, setRegs] = useState([]);
+  const [events, setEvents] = useState([]);
   const [search, setSearch] = useState('');
   const [tournament, setTournament] = useState('all');
   const [error, setError] = useState('');
 
   const load = async () => {
     try {
-      const [p, m, r] = await Promise.all([
+      const [p, m, r, ev] = await Promise.all([
         api.get('/admin/payments'),
         api.get('/admin/members'),
         api.get('/admin/registrations'),
+        api.get('/events/admin/all'),
       ]);
       setPayments(p.data);
       setMembers(m.data);
       setRegs(r.data);
+      setEvents(ev.data);
       setError('');
     } catch (err) {
       setError(err.response?.data?.error || 'Could not load dashboard data');
@@ -40,7 +61,6 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    document.title = 'Admin Dashboard | Disc Golf South Africa';
     load();
   }, []);
 
@@ -62,6 +82,16 @@ export default function AdminDashboard() {
       load();
     } catch (err) {
       setError(err.response?.data?.error || 'Could not update member');
+    }
+  };
+
+  const removeEvent = async (e) => {
+    if (!window.confirm(`Delete "${e.name}"? Its registrations will be removed too.`)) return;
+    try {
+      await api.delete(`/events/${e.event_id}`);
+      load();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Could not delete event');
     }
   };
 
@@ -87,6 +117,7 @@ export default function AdminDashboard() {
 
   return (
     <DashboardShell actions={actions}>
+      <Seo title="Dashboard" description="Your Disc Golf South Africa dashboard." noindex />
       {error && <p className="error-msg dash-error">{error}</p>}
 
       <div className="dash-grid">
@@ -176,6 +207,31 @@ export default function AdminDashboard() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </section>
+
+        <section className="card events-card" aria-labelledby="events-h">
+          <h2 id="events-h">Manage Events</h2>
+          <div className="scroll">
+            {events.length === 0 && <p className="muted">No events yet.</p>}
+            {events.length > 0 && (
+              <table className="table">
+                <thead><tr><th>Name</th><th>Date</th><th>Tier</th><th>Actions</th></tr></thead>
+                <tbody>
+                  {events.map((e) => (
+                    <tr key={e.event_id}>
+                      <td>{e.name}</td>
+                      <td>{e.start_datetime.slice(0, 10)}</td>
+                      <td>{e.pdga_tier}</td>
+                      <td className="row-actions">
+                        <Link to={`/events/${e.event_id}/edit`}>Edit</Link>
+                        <button className="danger-btn" onClick={() => removeEvent(e)}>Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </section>
       </div>

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api';
+import AuthPhoto from '../components/AuthPhoto';
+import Seo from '../components/Seo';
 
 export default function SignUp() {
   const [form, setForm] = useState({ full_name: '', email: '', password: '' });
@@ -26,8 +28,9 @@ export default function SignUp() {
 
   return (
     <main className="auth-page">
+      <Seo title="Sign Up" description="Create a free Disc Golf South Africa account and start registering for events." />
       <div className="glass auth-card">
-        <div className="auth-image" role="img" aria-label="Disc golf player" />
+        <AuthPhoto src="/Imgs/login.webp" alt="Player throwing a disc at a basket" />
         <form className="auth-form" onSubmit={handleSubmit}>
           <h1>Sign Up</h1>
           <input className="field" name="full_name" placeholder="Name & Surname" onChange={handleChange} required />
@@ -36,6 +39,7 @@ export default function SignUp() {
           {error && <p className="error-msg">{error}</p>}
           <button className="btn" type="submit">Create an account</button>
           <p className="auth-switch">Already have an account? <Link to="/login">Login</Link></p>
+          <Link to="/" className="back-link">← Back to home</Link>
         </form>
       </div>
     </main>

@@ -13,7 +13,7 @@ export default function Footer() {
         <li><a href="mailto:info@discgolfsa.org">info@discgolfsa.org</a></li>
         <li><a href="tel:+27794917034">079 491 7034</a></li>
       </ul>
-      <div className="footer-logo"><ImagePlaceholder label="Logo" ratio="1 / 1" /></div>
+      <div className="footer-logo"><ImagePlaceholder label="Logo" ratio="1 / 1" src="/Imgs/big-logo.webp" alt="Disc Golf South Africa logo" /></div>
     </footer>
   );
 }

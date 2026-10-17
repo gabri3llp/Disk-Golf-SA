@@ -1,0 +1,15 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/Imgs/*", "/*.{css,js,webp,png,jpg,jpeg,svg,ico,txt,xml,json}"]
+  },
+  "routes": [
+    { "route": "/Imgs/*", "headers": { "cache-control": "public, max-age=604800" } },
+    { "route": "/assets/*", "headers": { "cache-control": "public, max-age=31536000, immutable" } }
+  ],
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin"
+  }
+}

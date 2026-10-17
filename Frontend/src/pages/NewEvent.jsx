@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import api from '../api';
 import FileUpload from '../components/FileUpload';
 import SuccessModal from '../components/SuccessModal';
+import Seo from '../components/Seo';
 
 const TIERS = ['C-Tier', 'B-Tier', 'A-Tier'];
 
@@ -12,13 +13,36 @@ const EMPTY = {
   fee_non_member: '', fee_member: '', description: '', bank_details: '',
 };
 
+const splitDate = (v) => (v ? v.replace('T', ' ').split(' ') : ['', '']);
+
 export default function NewEvent() {
+  const { id } = useParams();
+  const editing = Boolean(id);
   const navigate = useNavigate();
   const [form, setForm] = useState(EMPTY);
   const [poster, setPoster] = useState(null);
+  const [hasPoster, setHasPoster] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (!editing) return;
+    api.get(`/events/${id}`)
+      .then(({ data }) => {
+        const [sd, st] = splitDate(data.start_datetime);
+        const [ed, et] = splitDate(data.end_datetime);
+        setForm({
+          name: data.name, location: data.location, pdga_tier: data.pdga_tier,
+          start_date: sd, start_time: (st || '').slice(0, 5),
+          end_date: ed, end_time: (et || '').slice(0, 5),
+          fee_non_member: String(data.fee_non_member), fee_member: String(data.fee_member),
+          description: data.description || '', bank_details: data.bank_details || '',
+        });
+        setHasPoster(Boolean(data.poster_path));
+      })
+      .catch(() => setError('Could not load this event'));
+  }, [id, editing]);
 
   const set = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -43,7 +67,8 @@ export default function NewEvent() {
     setError('');
     setBusy(true);
     try {
-      await api.post('/events', data);
+      if (editing) await api.put(`/events/${id}`, data);
+      else await api.post('/events', data);
       setDone(true);
     } catch (err) {
       setError(err.response?.data?.error || 'Something went wrong');
@@ -54,10 +79,12 @@ export default function NewEvent() {
 
   return (
     <main className="auth-page">
+      <Seo title="Event Editor" description="Create or edit an event." noindex />
       <form className="glass event-form" onSubmit={submit}>
         <div className="event-col">
-          <h1>New Event</h1>
+          <h1>{editing ? 'Edit Event' : 'New Event'}</h1>
           <FileUpload file={poster} onChange={setPoster} label="Event Poster" />
+          {editing && hasPoster && !poster && <small className="muted">Current poster kept unless you upload a new one.</small>}
           <input className="field" name="name" placeholder="Event Name" value={form.name} onChange={set} />
           <input className="field" name="location" placeholder="Location" value={form.location} onChange={set} />
           <select className="field" name="pdga_tier" value={form.pdga_tier} onChange={set}>
@@ -85,15 +112,17 @@ export default function NewEvent() {
           <textarea className="field" rows="3" name="bank_details" placeholder="Bank Details" value={form.bank_details} onChange={set} />
 
           {error && <p className="error-msg">{error}</p>}
-          <button className="btn" type="submit" disabled={busy}>{busy ? 'Adding…' : 'Add event'}</button>
+          <button className="btn" type="submit" disabled={busy}>
+            {busy ? 'Saving…' : editing ? 'Save changes' : 'Add event'}
+          </button>
           <Link to="/dashboard" className="auth-switch">← Back to dashboard</Link>
         </div>
       </form>
 
       {done && (
         <SuccessModal
-          title="Event added"
-          message="Your event is now live and will show up under Upcoming Events."
+          title={editing ? 'Event updated' : 'Event added'}
+          message={editing ? 'Your changes have been saved.' : 'Your event is now live and will show up under Upcoming Events.'}
           buttonText="Back to dashboard"
           onClose={() => navigate('/dashboard')}
         />
