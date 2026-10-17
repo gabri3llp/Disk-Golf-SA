@@ -555,11 +555,7 @@ input[type='time'].field { color-scheme: dark; }
 
 /*  login/sign up logo corner  */
 .auth-card { position: relative; }
-.auth-card::after {
-  content: ''; position: absolute; top: calc(var(--s4) * -1); right: calc(var(--s4) * -1);
-  width: 56px; height: 56px; pointer-events: none;
-  background: url('/Imgs/small-logo.webp') center / contain no-repeat;
-}
+
 
 /*  alert modal */
 .modal {
@@ -661,3 +657,13 @@ input[type='time'].field { color-scheme: dark; }
 .faq-a p + p, .faq-a ul + p { margin-top: var(--s3); }
 .faq-a ul { margin: var(--s3) 0 0 var(--s5); display: flex; flex-direction: column; gap: var(--s2); }
 .faq-a a { color: var(--amber-btn); font-weight: 600; }
+
+
+/*  auth page logos (final)  */
+.auth-card::after { content: none !important; display: none !important; }
+
+.auth-photo { position: relative; }
+.auth-photo-logo {
+  position: absolute; right: 16px; bottom: 16px; z-index: 2;
+  width: 64px; height: auto; display: block;
+}
