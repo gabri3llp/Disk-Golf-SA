@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 
 const SITE = 'Disc Golf South Africa';
+// Your unique Measurement ID from your Google Analytics stream screenshot
+const GA_TRACKING_ID = 'G-GE3HV6KEGD'; 
 
 function setTag(attr, key, content) {
   let el = document.head.querySelector(`meta[${attr}="${key}"]`);
@@ -37,6 +39,25 @@ export default function Seo({ title, description, image = '/Imgs/highlight-image
       document.head.appendChild(link);
     }
     link.setAttribute('href', url);
+
+
+    if (!window.gtag) {
+      const gaScript = document.createElement('script');
+      gaScript.async = true;
+      gaScript.src = `https://googletagmanager.com{GA_TRACKING_ID}`;
+      document.head.appendChild(gaScript);
+
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () {
+        window.dataLayer.push(arguments);
+      };
+      window.gtag('js', new Date());
+    }
+
+    window.gtag('config', GA_TRACKING_ID, {
+      page_path: window.location.pathname,
+    });
+
   }, [title, description, image, noindex]);
 
   return null;
