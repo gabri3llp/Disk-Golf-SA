@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { MEMBERSHIP_FEE } from '../constants';
 import Seo from '../components/Seo';
+import DemoNotice from '../components/DemoNotice';
+import { MEMBERSHIP_FEE } from '../constants';
 
 const BLURB = 'Support the growth of disc golf in South Africa while gaining access to member benefits, events, competitions, discounts, and a growing community.';
 
@@ -12,6 +13,9 @@ export default function MemberTier() {
       <Seo title="Membership" description="Compare the Free and DGSA Member tiers and join for R375 a year." />
       <div className="glass tier-wrap">
         <h1>Member Tier</h1>
+        <DemoNotice>
+          This is a demo website for a student project. The R{MEMBERSHIP_FEE} membership is not real, and no money is used or taken. You can choose either option to explore the site.
+        </DemoNotice>
         <div className="tier-grid">
           <section className="tier-card">
             <h2 className="tier-name">Free</h2>

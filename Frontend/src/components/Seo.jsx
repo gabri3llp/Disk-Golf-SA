@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 
 const SITE = 'Disc Golf South Africa';
-// Your unique Measurement ID from your Google Analytics stream screenshot
 const GA_TRACKING_ID = 'G-GE3HV6KEGD'; 
 
 function setTag(attr, key, content) {

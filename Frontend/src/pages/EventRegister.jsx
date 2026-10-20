@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import api from '../api';
 import FileUpload from '../components/FileUpload';
-import ImagePlaceholder from '../components/ImagePlaceholder';
 import SuccessModal from '../components/SuccessModal';
 import { BANK, DIVISIONS } from '../constants';
 import AuthPhoto from '../components/AuthPhoto';
 import Seo from '../components/Seo';
+import DemoNotice from '../components/DemoNotice';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const blank = () => ({ email: '', dgsa_membership_id: '', division: '' });
@@ -29,6 +29,7 @@ export default function EventRegister() {
 
   useEffect(() => {
     api.get(`/events/${id}`)
+      .then(({ data }) => setEvent(data))
       .catch(() => setError('Event not found'));
   }, [id]);
 
@@ -109,7 +110,8 @@ export default function EventRegister() {
     <main className="auth-page">
       <Seo title="Event Registration" description="Register for a Disc Golf South Africa event." noindex />
       <div className="glass auth-card">
-      <AuthPhoto src="/Imgs/become-a-member.webp" alt="Player mid-throw in a South Africa shirt" />        <div className="auth-form">
+        <AuthPhoto src="/Imgs/become-a-member.webp" alt="Player mid-throw in a South Africa shirt" />
+        <div className="auth-form">
           <small className="accent">{event ? event.name : 'Event'}</small>
           <h1>Registration</h1>
 
@@ -129,6 +131,7 @@ export default function EventRegister() {
                     <option value="">Select Division</option>
                     {DIVISIONS.map((d) => <option key={d}>{d}</option>)}
                   </select>
+                  <DemoNotice />
                   <div className="bank-row">
                     <dl className="bank">
                       <dt>DGSA Banking Details</dt>
@@ -179,6 +182,7 @@ export default function EventRegister() {
 
           {stage === 'pay' && (
             <>
+              <DemoNotice />
               <div className="bank-row">
                 <dl className="bank">
                   <dt>DGSA Banking Details</dt>

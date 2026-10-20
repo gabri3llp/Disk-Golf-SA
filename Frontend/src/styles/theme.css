@@ -667,3 +667,38 @@ input[type='time'].field { color-scheme: dark; }
   position: absolute; right: 16px; bottom: 16px; z-index: 2;
   width: 64px; height: auto; display: block;
 }
+
+/* Fixing mobile navbar  */
+.nav-short { display: none; }
+
+@media (max-width: 700px) {
+  .navbar {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: var(--s2);
+    padding: var(--s2) var(--s3);
+    border-radius: 0 0 16px 16px;
+  }
+  .navbar-logo { width: 40px; min-width: 40px; }
+  .navbar-links { gap: var(--s3); }
+  .navbar a { font-size: 0.85rem; white-space: nowrap; }
+  .nav-long { display: none; }
+  .nav-short { display: inline; }
+}
+
+@media (max-width: 380px) {
+  .navbar-links { gap: var(--s2); }
+  .navbar a { font-size: 0.78rem; }
+}
+
+/*demo notice  */
+.demo-notice {
+  background: rgba(255, 168, 0, 0.14);
+  border: 1px solid var(--orange);
+  border-radius: 10px;
+  padding: var(--s3) var(--s4);
+  font-size: 0.9rem;
+  color: var(--white);
+  text-align: left;
+}
+.demo-notice strong { color: var(--orange); }

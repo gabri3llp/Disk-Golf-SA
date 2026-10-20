@@ -6,6 +6,7 @@ import AuthPhoto from '../components/AuthPhoto';
 import SuccessModal from '../components/SuccessModal';
 import { BANK, MEMBERSHIP_FEE, DIVISIONS } from '../constants';
 import Seo from '../components/Seo';
+import DemoNotice from '../components/DemoNotice';
 
 const PROVINCES = ['Eastern Cape', 'Free State', 'Gauteng', 'KwaZulu-Natal', 'Limpopo',
   'Mpumalanga', 'Northern Cape', 'North West', 'Western Cape'];
@@ -113,7 +114,8 @@ export default function BecomeMember() {
 
           {step === 3 && (
             <>
-              <div className="bank-row">
+             <DemoNotice />
+                <div className="bank-row">
                 <dl className="bank">
                   <dt>DGSA Banking Details</dt>
                   <dd>Bank: {BANK.bank}</dd>
