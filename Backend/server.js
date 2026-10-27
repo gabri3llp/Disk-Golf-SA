@@ -25,6 +25,7 @@ app.get('/files/posters/:name', async (req, res) => {
   }
 });
 
+app.get('/', (req, res) => res.send('DGSA API is running'));
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/events', require('./routes/events'));
@@ -32,10 +33,11 @@ app.use('/api/members', require('./routes/members'));
 app.use('/api/registrations', require('./routes/registrations'));
 app.use('/api/admin', require('./routes/admin'));
 
-app.listen(process.env.PORT, (err) => {
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, (err) => {
   if (err) {
     console.error('Could not start the server:', err.message);
     process.exit(1);
   }
-  console.log(`API running on port ${process.env.PORT}`);
+  console.log(`API running on port ${PORT}`);
 });
