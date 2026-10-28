@@ -1,101 +1,148 @@
 # Disc Golf South Africa (DGSA)
 
-A full-stack web application that promotes disc golf in South Africa. Visitors can browse upcoming tournaments, create an account, choose a Free or paid DGSA membership, and register players for events. Administrators review proof of payment, approve memberships, manage members, and create, edit and delete events.
+**A web application promoting disc golf in South Africa.**
 
-**Module:** Interactive Development 200 (DV200)
-**Student:** Gabriel Pulella (251298)
+Disc Golf South Africa is a web application where users can explore tournaments, sign up for membership, and register for events. Administrators can manage events, members, and payment approvals.
 
-> **Demo project.** No real money is used or processed. Banking details and amounts shown in the payment steps are for demonstration only. Please do not make any real payment.
+**Module:** Interactive Development 200 (DV200)  
+**Student:** Gabriel Pulella
 
----
+*This is a demo project. No real payments are processed.*
 
-## Live deployments
+## 🌐 Live Deployments
 
-| Platform | What it hosts | URL |
-|---|---|---|
-| **Platform 1: Azure Static Web Apps** | Frontend (React + Vite) | https://victorious-desert-0caf98b00.4.azurestaticapps.net |
-| **Platform 2: AWS Amplify** | Frontend (React + Vite) | https://main.dukd5mhqsue22.amplifyapp.com |
-| Shared API (Azure App Service) | Node/Express backend | dgsa-api-2026-fhhzg5a5grfvgudg.southafricanorth-01.azurewebsites.net |
-
-Both frontends are built from this repository and call the same API and database.
-
-> **Note:** the API runs on Azure's Free App Service plan, which sleeps when idle. If events don't load straight away, open the API link above once, wait up to a minute, then refresh either site.
-
----
-
-## Design reference
-
-The interface implements a design created by UX200 students. All layout, branding, imagery and interface components follow that design as closely as practical.
-
-Deliberate differences from the design:
-- The membership fee is shown as **R375** everywhere 
-- A **demo notice** appears on the membership and payment screens.
-- Event and dashboard details were extended where the design did not show them (for example, event editing and deleting, and the multi-player registration flow).
-- An animated background and a mobile navbar layout were added.
-
----
-
-## Features
-
-**Public**
-- Home page with tournament highlight, upcoming events carousel and FAQ accordion
-- Login and sign-up
-- Responsive layout designed for phones first 
-
-**Players**
-- Membership tiers: Free or DGSA Member (R375 per year, demo only)
-- Three-step "Become a Member" form with proof-of-payment upload
-- Event registration for one or several players, with a server-calculated price 
-- Player dashboard: next event, my registrations, upcoming events
-
-**Administrators**
-- Live payment feed with approve, mark overdue and set-to-pending actions (approving a membership upgrades the user to DGSA)
-- Member overview with active and inactive toggle, plus name search
-- Tournament registrations table with a tournament filter and proof-of-payment links
-- Create, edit and delete events, including poster upload
-
-**Quality and SEO**
-- Per-page titles, meta descriptions, canonical tags, `sitemap.xml` and `robots.txt`
-- Google Analytics 4 page and event tracking
-- WebP images, lazy loading, and an animated background that respects "reduce motion"
-
----
-
-## Technologies used
-
-| Area | Technology |
+| Platform | Link |
 |---|---|
-| Frontend | React, Vite, react-router-dom, axios, plain CSS (custom properties) |
-| Backend | Node.js, Express 5, mysql2, bcryptjs, jsonwebtoken, multer, helmet, compression, cors, dotenv, express-validator |
-| Database | MySQL (Azure Database for MySQL Flexible Server online; XAMPP/MariaDB locally) |
-| File storage | Cloud blob storage through `Backend/storage.js`, with a local-disk fallback |
-| Hosting | Azure Static Web Apps, AWS Amplify, Azure App Service |
-| Tooling | Git and GitHub, GitHub Actions, VS Code, Azure CLI, phpMyAdmin |
-| Analytics and SEO | Google Analytics 4, Google Search Console |
+| Azure Static Web Apps | [Visit website](https://victorious-desert-0caf98b00.4.azurestaticapps.net) |
+| AWS Amplify | [Visit website](https://main.dukd5mhqsue22.amplifyapp.com) |
 
----
+## ✨ Features
 
-## Project structure
+- Responsive home page with upcoming events and FAQs.
+- User registration and login.
+- Free and paid membership options.
+- Event registration for one or multiple players.
+- Player dashboard for viewing registrations and events.
+- Admin dashboard for managing members, payments, and registrations.
+- Create, edit, and delete tournaments.
+- Upload event posters and proof of payment.
+- Secure login and admin access.
+- SEO features and Google Analytics integration.
 
-```
-Disk Golf SA/
+## 🎨 Design Reference
+
+The website was developed using a UX design created by **[DESIGNER NAME]** for UX200.
+
+The implementation follows the supplied design, with additional functionality such as event management, multi-player registration, mobile navigation, and demo payment notices.
+
+The membership fee is displayed as R375 throughout the application for consistency.
+
+## 🛠️ Technologies Used
+
+**Frontend**
+- React
+- Vite
+- JavaScript
+- CSS
+
+**Backend**
+- Node.js
+- Express
+- JWT authentication
+- Axios
+- Multer
+
+**Database and Storage**
+- MySQL
+- Azure Database for MySQL
+- Azure Blob Storage
+
+**Deployment and Tools**
+- Azure Static Web Apps
+- AWS Amplify
+- Azure App Service
+- Git and GitHub
+
+## 🏗️ Project Structure
+
+```text
+Disk-Golf-SA/
 ├── Backend/
-│   ├── server.js            Express app: security, CORS, routes
-│   ├── Database.js          MySQL connection pool (SSL optional)
-│   ├── storage.js           File uploads (cloud storage or local fallback)
-│   ├── schema.sql           Database schema and seed lookup data
-│   ├── setupDatabase.js     Creates the first accounts and sample events
-│   ├── importSql.js         Runs a .sql file against a remote database over SSL
-│   ├── changePassword.js    Sets a new password for a user
-│   ├── data/store.js        All SQL queries
-│   ├── middleware/          auth.js (JWT, roles), upload.js (multer)
-│   └── routes/              auth, events, members, registrations, admin
+│   ├── server.js
+│   ├── Database.js
+│   ├── storage.js
+│   ├── data/
+│   ├── middleware/
+│   └── routes/
 └── Frontend/
-    ├── public/              Images (WebP), robots.txt, sitemap.xml, staticwebapp.config.json
-    ├── .env.production      Public build settings (API address, analytics ID)
+    ├── public/
     └── src/
-        ├── pages/           Home, Login, SignUp, MemberTier, BecomeMember,
-        │                    EventRegister, NewEvent, Dashboard, AdminDashboard, PlayerDashboard
-        ├── components/      Navbar, Footer, Faq, EventsCarousel, FileUpload, SuccessModal,
-        │                    DashboardShell, AuthPhoto, AnimatedBackground, Seo, DemoNotice, ...
-        ├── api.js           axios instance with token handling
+        ├── components/
+        ├── pages/
+        └── styles/
+```
+
+## 🚀 Running the Project Locally
+
+**Requirements:** Node.js 20 or newer and MySQL or MariaDB.
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/gabri3llp/Disk-Golf-SA.git
+   cd Disk-Golf-SA
+   ```
+
+2. Create a MySQL database named `discgolf_sa` and import `Backend/schema.sql`.
+
+3. Create a `Backend/.env` file with the required database settings and a JWT secret.
+
+4. Install the backend dependencies and start the server:
+
+   ```bash
+   cd Backend
+   npm install
+   npm run dev
+   ```
+
+5. In a separate terminal, start the frontend:
+
+   ```bash
+   cd Frontend
+   npm install
+   npm run dev
+   ```
+
+The frontend runs locally at `http://localhost:5173`.
+
+## ☁️ Deployment
+
+The frontend is deployed on Azure Static Web Apps and AWS Amplify. GitHub is used to manage the project source code and deployment workflows.
+
+Both deployments allow users to access the website online.
+
+## ⚠️ Challenges and Solutions
+
+- **Hosting limitations:** Investigated availability issues and the limits of the free hosting plan.
+- **Backend startup errors:** Checked environment settings and corrected a malformed storage connection setting.
+- **CORS issues:** Resolved cross-origin configuration problems affecting the deployed websites.
+- **Database migration:** Used a database schema and import script to move the database to Azure.
+
+These challenges helped me improve my debugging and deployment skills.
+
+## 🔒 Security
+
+- Secrets and database credentials are stored outside the public repository.
+- Passwords are hashed.
+- JWT authentication protects private features.
+- Admin operations require the appropriate role.
+- File uploads are restricted by file type and size.
+
+Administrator login details are provided separately with the Canvas submission and are not published in this repository.
+
+## 🙌 Acknowledgements
+
+- UX design supplied for the UX200 project.
+- Disc golf content and FAQ material supplied for the project.
+
+**Built by Gabriel Pulella for DV200 — Interactive Development 200.**
