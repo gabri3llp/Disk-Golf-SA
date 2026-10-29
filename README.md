@@ -31,7 +31,7 @@ Disc Golf South Africa is a web application where users can explore tournaments,
 
 ## 🎨 Design Reference
 
-The website was developed using a UX design created by **[DESIGNER NAME]** for UX200.
+The website was developed using a UX design created by a group of studnets from UX200.
 
 The implementation follows the supplied design, with additional functionality such as event management, multi-player registration, mobile navigation, and demo payment notices.
 
